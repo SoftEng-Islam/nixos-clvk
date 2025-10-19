@@ -1,5 +1,5 @@
 {
-  description = "Standalone CLVK package";
+  description = "Standalone CLVK package (fixed for Nix)";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -27,29 +27,46 @@
             cmake
             ninja
             python3
+            git
             shaderc
             glslang
           ];
+
           buildInputs = with pkgs.llvmPackages_19;
             with pkgs; [
               llvm
               clang-unwrapped
-              clang-unwrapped.lib
               vulkan-headers
               vulkan-loader
             ];
 
+          # Fetch Clspv’s extra dependencies before CMake config
+          preConfigure = ''
+            echo ">>> Running CLVK's fetch_sources.py ..."
+            cd external/clspv
+            ${pkgs.python3}/bin/python3 utils/fetch_sources.py
+            cd ../..
+          '';
+
           cmakeFlags =
             [ "-DCLVK_BUILD_TESTS=OFF" "-DCLVK_CLSPV_ONLINE_COMPILER=OFF" ];
 
-          postInstall = ''
-            mkdir -p $out/etc/OpenCL/vendors
-            echo $out/libOpenCL.so > $out/etc/OpenCL/vendors/clvk.icd
+          installPhase = ''
+            mkdir -p $out/lib $out/etc/OpenCL/vendors
+            cp -r bin lib include $out/ 2>/dev/null || true
+            echo "$out/lib/libOpenCL.so" > $out/etc/OpenCL/vendors/clvk.icd
           '';
+
+          meta = with pkgs.lib; {
+            description = "CLVK: OpenCL implementation over Vulkan";
+            homepage = "https://github.com/kpet/clvk";
+            license = licenses.asl20;
+            maintainers = with maintainers; [ ];
+            platforms = platforms.linux;
+          };
         };
       });
 
-      # Provide a simple devShell with OpenCL tools
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
           packages = with pkgs; [
@@ -62,7 +79,7 @@
             export OCL_ICD_VENDORS="${
               self.packages.${pkgs.system}.default
             }/etc/OpenCL/vendors"
-            echo "CLVK shell ready"
+            echo "✅ CLVK shell ready"
           '';
         };
       });
