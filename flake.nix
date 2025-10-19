@@ -1,5 +1,5 @@
 {
-  description = "Standalone CLVK package (fixed for Nix)";
+  description = "Standalone CLVK package (fully sandbox-safe)";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -20,14 +20,12 @@
         default = pkgs.stdenv.mkDerivation {
           pname = "clvk";
           version = "git";
-
           src = clvk-src;
 
           nativeBuildInputs = with pkgs; [
             cmake
             ninja
             python3
-            git
             shaderc
             glslang
           ];
@@ -40,12 +38,25 @@
               vulkan-loader
             ];
 
-          # Fetch Clspv’s extra dependencies before CMake config
-          preConfigure = ''
-            echo ">>> Running CLVK's fetch_sources.py ..."
-            cd external/clspv
-            ${pkgs.python3}/bin/python3 utils/fetch_sources.py
-            cd ../..
+          # Pre-populate CLSPV third_party sources (no network)
+          postUnpack = ''
+            mkdir -p $sourceRoot/external/clspv/third_party
+            cp -r ${
+              pkgs.fetchFromGitHub {
+                owner = "KhronosGroup";
+                repo = "SPIRV-Headers";
+                rev = "1.3.261.1"; # stable tag
+                sha256 = "sha256-TuvSm8/Fno0EGObzq9myIPbZZhsh+uJMyOn8QsxBoB0=";
+              }
+            } $sourceRoot/external/clspv/third_party/SPIRV-Headers
+            cp -r ${
+              pkgs.fetchFromGitHub {
+                owner = "KhronosGroup";
+                repo = "SPIRV-Tools";
+                rev = "v2024.2"; # any compatible recent tag
+                sha256 = "sha256-7iCuSzIULppnHwZlkFiAnvMqKHmpUj9cOLwPeHK8RxI=";
+              }
+            } $sourceRoot/external/clspv/third_party/SPIRV-Tools
           '';
 
           cmakeFlags =
@@ -58,7 +69,7 @@
           '';
 
           meta = with pkgs.lib; {
-            description = "CLVK: OpenCL implementation over Vulkan";
+            description = "CLVK: OpenCL on Vulkan (Nix sandbox-safe build)";
             homepage = "https://github.com/kpet/clvk";
             license = licenses.asl20;
             maintainers = with maintainers; [ ];
