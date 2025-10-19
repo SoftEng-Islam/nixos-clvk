@@ -30,13 +30,14 @@
             shaderc
             glslang
           ];
-          buildInputs = with pkgs.llvmPackages_19; [
-            llvm
-            clang-unwrapped
-            clang-unwrapped.lib
-            vulkan-headers
-            vulkan-loader
-          ];
+          buildInputs = with pkgs.llvmPackages_19;
+            with pkgs; [
+              llvm
+              clang-unwrapped
+              clang-unwrapped.lib
+              vulkan-headers
+              vulkan-loader
+            ];
 
           cmakeFlags =
             [ "-DCLVK_BUILD_TESTS=OFF" "-DCLVK_CLSPV_ONLINE_COMPILER=OFF" ];

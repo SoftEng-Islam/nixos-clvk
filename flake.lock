@@ -1,0 +1,46 @@
+{
+  "nodes": {
+    "clvk-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1760543006,
+        "narHash": "sha256-TKmtbVBeu1hHoff+E5dkmcb5p8JaXUNv6Sg8lH/bSSQ=",
+        "ref": "refs/heads/main",
+        "rev": "03c8a4092f9d79aac8e2817e753168c6adef43e6",
+        "revCount": 763,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/kpet/clvk.git"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/kpet/clvk.git"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1760524057,
+        "narHash": "sha256-EVAqOteLBFmd7pKkb0+FIUyzTF61VKi7YmvP1tw4nEw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "544961dfcce86422ba200ed9a0b00dd4b1486ec5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "clvk-src": "clvk-src",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
